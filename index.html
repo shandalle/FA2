@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Order Form</title>
+  <!-- Styling for form layout and appearance -->
   <style>
     body { font-family: Arial, sans-serif; max-width: 500px; margin: 20px auto; }
     label { display: inline-block; width: 130px; vertical-align: top; }
@@ -13,24 +14,21 @@
   </style>
 </head>
 <body>
-  // Main heading for the order form
-  <h1>Order Form</h1>
   
-  // Form container that triggers printReceipt() when submitted
+  <!-- Main order form section -->
+  <h1>Order Form</h1>
   <form id="orderForm" onsubmit="return printReceipt();">
-    // Customer full name input field
+    <!-- Customer full name input -->
     <div class="row">
       <label for="fullName">Full Name:</label>
       <input type="text" id="fullName" name="fullName" required />
     </div>
-    
-    // Grade and section input (use "NA" for Faculty & Staff)
+    <!-- Grade and section input (or NA for Faculty/Staff) -->
     <div class="row">
       <label for="gradeSection">Grade & Section:</label>
       <input type="text" id="gradeSection" name="gradeSection" placeholder="NA for F&S" required />
     </div>
-    
-    // Dropdown menu to select food item with prices
+    <!-- Food menu selection with prices -->
     <div class="row">
       <label for="menuItem">Food:</label>
       <select id="menuItem" name="menuItem" required>
@@ -39,14 +37,12 @@
         <option value="Beef meal">Beef meal (PHP 105)</option>
       </select>
     </div>
-    
-    // Quantity input with minimum of 1 and maximum of 5
+    <!-- Quantity selector (limited to 5 items maximum) -->
     <div class="row">
       <label for="quantity">Quantity (Max of 5):</label>
       <input type="number" id="quantity" name="quantity" min="1" max="5" value="1" required />
     </div>
-    
-    // Customer type selector (Student or Faculty/Staff)
+    <!-- Customer type selection for discount eligibility -->
     <div class="row">
       <label for="customerType">Customer Type:</label>
       <select id="customerType" name="customerType" required>
@@ -54,23 +50,21 @@
         <option value="Faculty/Staff">Faculty/Staff</option>
       </select>
     </div>
-    
-    // Submit button to place the order
+    <!-- Submit button to process the order -->
     <div class="row">
       <input type="submit" value="Place Order" />
     </div>
   </form>
 
-  // Section heading for displaying the order summary receipt
+  <!-- Order receipt display area -->
   <h2>ORDER SUMMARY</h2>
-  
-  // Container where the receipt will be dynamically generated
   <div id="receipt"></div>
 
   <script>
-    // Calculates the subtotal by looking up the unit price of the selected food item and multiplying by quantity
+    // Calculates the subtotal based on menu item and quantity
     function calculateSubtotal(order, quantity) {
       let unitPrice;
+      // Determine price based on selected food item
       switch (order) {
         case "Chicken meal":
           unitPrice = 75;
@@ -87,7 +81,7 @@
       return unitPrice * quantity;
     }
 
-    // Calculates discount amount - Students get 20% discount, Faculty/Staff get no discount
+    // Calculates discount based on customer type (20% for students)
     function calculateDiscount(total, custType) {
       if (custType === "Student") {
         return total * 0.2;
@@ -95,33 +89,31 @@
       return 0;
     }
 
-    // Main function that retrieves form data, calculates totals, and displays the receipt
+    // Generates and displays the order receipt
     function printReceipt() {
-      // Retrieve customer information from form inputs
+      // Retrieve form input values
       const fullName = document.getElementById("fullName").value.trim();
       const gradeSection = document.getElementById("gradeSection").value.trim();
       const menuItem = document.getElementById("menuItem").value;
       const quantity = Number(document.getElementById("quantity").value);
       const customerType = document.getElementById("customerType").value;
 
-      // Get the receipt display element
       const receiptEl = document.getElementById("receipt");
-      
-      // Calculate the subtotal based on selected item and quantity
+      // Calculate subtotal for the order
       const subtotal = calculateSubtotal(menuItem, quantity);
 
-      // Check if an error occurred (item not found)
+      // Validate menu item selection
       if (typeof subtotal === "string") {
         receiptEl.innerHTML = "<p>" + subtotal + "</p>";
         return false;
       }
 
-      // Calculate discount based on customer type and calculate total amount due
+      // Calculate discount and final total
       const discount = calculateDiscount(subtotal, customerType);
       const totalDue = subtotal - discount;
       const itemPrice = subtotal / quantity;
 
-      // Generate and display the receipt with all order details
+      // Display receipt with all order details
       receiptEl.innerHTML =
         "<p>Customer: " + fullName + "</p>" +
         "<p>Grade & Section: " + gradeSection + "</p>" +
