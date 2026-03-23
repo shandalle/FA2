@@ -1,103 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Canteen Pre-order</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Form</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 500px; margin: 20px auto; }
+    label { display: inline-block; width: 130px; vertical-align: top; }
+    input, select { width: 240px; margin-bottom: 10px; }
+    .row { margin-bottom: 8px; }
+    h1, h2 { margin-bottom: 6px; }
+  </style>
 </head>
 <body>
-    <h1>Canteen Pre-order Form</h1>
-    <form id="orderForm">
-        <div>
-            <label for="fullName">Customer's Full Name:</label>
-            <input type="text" id="fullName" name="fullName" required />
-        </div>
-        <div>
-            <label for="gradeSection">Grade and Section (or NA):</label>
-            <input type="text" id="gradeSection" name="gradeSection" required />
-        </div>
-        <div>
-            <label for="menuItem">Menu Item:</label>
-            <select id="menuItem" name="menuItem">
-                <option value="rice">rice</option>
-                <option value="viand">viand</option>
-                <option value="burger">burger</option>
-                <option value="juice">juice</option>
-                <option value="water">water</option>
-            </select>
-        </div>
-        <div>
-            <label for="quantity">Quantity:</label>
-            <input type="number" id="quantity" name="quantity" min="1" value="1" required />
-        </div>
-        <div>
-            <label for="student">
-                <input type="radio" id="student" name="role" value="student" required /> Student
-            </label>
-            <label for="staff">
-                <input type="radio" id="staff" name="role" value="staff" required /> Teacher/Staff
-            </label>
-        </div>
-        <div>
-            <button type="submit">Place Order</button>
-        </div>
-    </form>
+  <h1>Order Form</h1>
+  <form id="orderForm" onsubmit="return printReceipt();">
+    <div class="row">
+      <label for="fullName">Full Name:</label>
+      <input type="text" id="fullName" name="fullName" required />
+    </div>
+    <div class="row">
+      <label for="gradeSection">Grade & Section:</label>
+      <input type="text" id="gradeSection" name="gradeSection" placeholder="NA for F&S" required />
+    </div>
+    <div class="row">
+      <label for="menuItem">Food:</label>
+      <select id="menuItem" name="menuItem" required>
+        <option value="Chicken meal">Chicken meal (PHP 75)</option>
+        <option value="Pork meal">Pork meal (PHP 85)</option>
+        <option value="Beef meal">Beef meal (PHP 105)</option>
+      </select>
+    </div>
+    <div class="row">
+      <label for="quantity">Quantity (Max of 5):</label>
+      <input type="number" id="quantity" name="quantity" min="1" max="5" value="1" required />
+    </div>
+    <div class="row">
+      <label for="customerType">Customer Type:</label>
+      <select id="customerType" name="customerType" required>
+        <option value="Student">Student</option>
+        <option value="Faculty/Staff">Faculty/Staff</option>
+      </select>
+    </div>
+    <div class="row">
+      <input type="submit" value="Place Order" />
+    </div>
+  </form>
 
-    <div id="output"></div>
+  <h2>ORDER SUMMARY</h2>
+  <div id="receipt"></div>
 
-    <script>
-        document.getElementById('orderForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            calculateAmount();
-        });
+  <script>
+    function calculateSubtotal(order, quantity) {
+      let unitPrice;
+      switch (order) {
+        case "Chicken meal":
+          unitPrice = 75;
+          break;
+        case "Pork meal":
+          unitPrice = 85;
+          break;
+        case "Beef meal":
+          unitPrice = 105;
+          break;
+        default:
+          return "Item not found";
+      }
+      return unitPrice * quantity;
+    }
 
-        function calculateAmount() {
-            var item = document.getElementById('menuItem').value;
-            var qty = Number(document.getElementById('quantity').value);
-            var role = document.querySelector('input[name="role"]:checked').value;
-            var price;
+    function calculateDiscount(total, custType) {
+      if (custType === "Student") {
+        return total * 0.2;
+      }
+      return 0;
+    }
 
-            switch (item) {
-                case 'rice':
-                    price = 10;
-                    break;
-                case 'viand':
-                    price = 60;
-                    break;
-                case 'burger':
-                    price = 45;
-                    break;
-                case 'juice':
-                    price = 20;
-                    break;
-                case 'water':
-                    price = 15;
-                    break;
-                default:
-                    price = null;
-            }
+    function printReceipt() {
+      const fullName = document.getElementById("fullName").value.trim();
+      const gradeSection = document.getElementById("gradeSection").value.trim();
+      const menuItem = document.getElementById("menuItem").value;
+      const quantity = Number(document.getElementById("quantity").value);
+      const customerType = document.getElementById("customerType").value;
 
-            var output = document.getElementById('output');
-            if (price === null) {
-                output.innerHTML = '<p>Item not found</p>';
-                return;
-            }
+      const receiptEl = document.getElementById("receipt");
+      const subtotal = calculateSubtotal(menuItem, quantity);
 
-            var rawTotal = price * qty;
-            var discount = 0;
-            if (role === 'student') {
-                discount = rawTotal * 0.20;
-            }
-            var finalTotal = rawTotal - discount;
+      if (typeof subtotal === "string") {
+        receiptEl.innerHTML = "<p>" + subtotal + "</p>";
+        return false;
+      }
 
-            output.innerHTML = ''
-                + '<p>Selected item: ' + item + '</p>'
-                + '<p>Quantity: ' + qty + '</p>'
-                + '<p>Unit price: ₱' + price.toFixed(2) + '</p>'
-                + '<p>Raw total: ₱' + rawTotal.toFixed(2) + '</p>'
-                + '<p>Discount: ₱' + discount.toFixed(2) + '</p>'
-                + '<p><strong>Total due: ₱' + finalTotal.toFixed(2) + '</strong></p>';
-        }
-    </script>
+      const discount = calculateDiscount(subtotal, customerType);
+      const totalDue = subtotal - discount;
+      const itemPrice = subtotal / quantity;
+
+      receiptEl.innerHTML =
+        "<p>Customer: " + fullName + "</p>" +
+        "<p>Grade & Section: " + gradeSection + "</p>" +
+        "<p>Order: " + menuItem + " (PHP " + itemPrice.toFixed(2) + ")</p>" +
+        "<p>Quantity: " + quantity + "</p>" +
+        "<p>Subtotal: PHP " + subtotal.toFixed(2) + "</p>" +
+        "<p>Discount: PHP " + discount.toFixed(2) + "</p>" +
+        "<p><strong>Total Due: PHP " + totalDue.toFixed(2) + "</strong></p>" +
+        "<p>Thank you for your patronage!</p>";
+
+      return false;
+    }
+  </script>
 </body>
 </html>
